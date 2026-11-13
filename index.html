@@ -3,526 +3,152 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terminplanung Tool</title>
+    <title>Terminplaner — nozilla</title>
+    <meta name="description" content="Den Termin finden, der für alle passt. Ein Werkzeug von nozilla." />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/daimpad/nozilla-ci@71939b3d4a01f3f181f2e6dc86783bae8654f2f9/project/assets/favicon.svg" type="image/svg+xml" />
+    <!-- nozilla Design System, fester Stand: ein Update ist eine bewusste Änderung dieser Zeilen -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/daimpad/nozilla-ci@71939b3d4a01f3f181f2e6dc86783bae8654f2f9/project/fonts.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/daimpad/nozilla-ci@71939b3d4a01f3f181f2e6dc86783bae8654f2f9/design-system.css" />
+    <link rel="stylesheet" href="terminplaner.css" />
 </head>
-<style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Zilla Slab', serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .card {
-            background: #ffffcc;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2c3e50;
-        }
-
-        input[type="text"], input[type="datetime-local"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .btn {
-            background: #53f9ac;
-            color: #000;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: 'Zilla Slab', serif;
-            transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(83, 249, 172, 0.3);
-        }
-
-        .btn:hover {
-            background: #45e699;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(83, 249, 172, 0.4);
-        }
-
-        .btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-success {
-            background: #53f9ac;
-            color: #000;
-        }
-
-        .btn-success:hover {
-            background: #45e699;
-        }
-
-        .btn-danger {
-            background: #000;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #333;
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 14px;
-            margin: 5px;
-        }
-
-        .options-list {
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 15px;
-            background: #f8f9fa;
-        }
-
-        .option-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .option-item:last-child {
-            border-bottom: none;
-        }
-
-        .poll-table {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        th {
-            background: #53f9ac;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .response-cell {
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-            position: relative;
-            width: 40px;
-            height: 40px;
-            vertical-align: middle;
-        }
-
-        .response-cell:hover {
-            background: #53f9ac;
-            color: #000;
-            transform: scale(1.05);
-        }
-
-        .response-cell.clickable {
-            border: 2px dashed #53f9ac;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { border-color: #53f9ac; }
-            50% { border-color: #45e699; }
-            100% { border-color: #53f9ac; }
-        }
-
-        .response-cell.clickable:hover {
-            border-color: #45e699;
-            animation: none;
-        }
-
-        .response-indicator {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            border: 2px solid #ccc;
-            background: transparent;
-            transition: all 0.3s;
-        }
-
-        .response-indicator.filled {
-            background: #53f9ac;
-            border-color: #45e699;
-        }
-
-        .available .response-indicator {
-            background: #27ae60;
-            border-color: #229954;
-        }
-
-        .unavailable .response-indicator {
-            background: #e74c3c;
-            border-color: #c0392b;
-        }
-
-        .maybe .response-indicator {
-            background: #f39c12;
-            border-color: #e67e22;
-        }
-
-        .available {
-            background: #27ae60;
-            color: white;
-        }
-
-        .unavailable {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .maybe {
-            background: #f39c12;
-            color: white;
-        }
-
-        .instructions-banner {
-            background: linear-gradient(135deg, #53f9ac, #45e699);
-            color: #000;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: 500;
-            font-size: 18px;
-            box-shadow: 0 4px 10px rgba(83, 249, 172, 0.3);
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .instructions-banner .icon {
-            font-size: 24px;
-            margin-right: 10px;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0 5px;
-        }
-
-        .status-available {
-            background: #27ae60;
-            color: white;
-        }
-
-        .status-maybe {
-            background: #f39c12;
-            color: white;
-        }
-
-        .status-unavailable {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .legend {
-            background: rgba(83, 249, 172, 0.1);
-            border: 2px solid #53f9ac;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .legend-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #000;
-        }
-
-        .summary-row {
-            font-weight: bold;
-            background: #ecf0f1;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
-        }
-
-        .share-section {
-            background: #53f9ac;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            position: sticky;
-            bottom: 20px;
-            box-shadow: 0 4px 15px rgba(83, 249, 172, 0.4);
-            border: 2px solid #45e699;
-        }
-
-        .share-section h3 {
-            color: #000;
-            margin-bottom: 10px;
-        }
-
-        .share-section p {
-            color: #000;
-            font-weight: 500;
-        }
-
-        .share-url {
-            background: white;
-            padding: 12px;
-            border: 2px solid #000;
-            border-radius: 6px;
-            word-break: break-all;
-            font-family: monospace;
-            margin: 10px 0;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .firebase-status {
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .firebase-connected {
-            background: #d5f4e6;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .firebase-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .sheets-section {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 6px;
-            margin-top: 20px;
-        }
-
-        .config-section {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .config-input {
-            margin: 10px 0;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .poll-table {
-                font-size: 14px;
-            }
-        }
-</style>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Terminplanung Tool</h1>
-            <p>Finden Sie den besten Termin für alle Beteiligten</p>
-            <div id="firebaseStatus" class="firebase-status hidden"></div>
-        </div>
+    <main class="page">
+        <header class="masthead">
+            <a class="wordmark" href="https://nozilla.de" aria-label="nozilla — zur Website">nozilla<span>.</span></a>
+            <div class="nz-label">Werkzeug · Terminplaner</div>
+        </header>
 
-        <div id="configSavedNotice" class="card hidden">
-            <h2>Konfiguration gespeichert</h2>
-            <p>Ihre Firebase- und Google Sheets-Einstellungen wurden gespeichert und müssen nicht erneut eingegeben werden.</p>
-            <button onclick="clearConfig()" class="btn btn-danger btn-small">Konfiguration löschen</button>
-        </div>
+        <section class="intro">
+            <h1>Termin <mark class="g">finden</mark>.</h1>
+            <p class="intro__lede">Termine vorschlagen, Link teilen, alle tragen ein, wann sie können. Der beste Termin steht oben.</p>
+            <ol class="nz-steps intro__steps" aria-label="So geht es">
+                <li class="nz-step"><span class="nz-step__dot">1</span><span class="nz-step__label">Termine vorschlagen</span></li>
+                <li class="nz-step"><span class="nz-step__dot">2</span><span class="nz-step__label">Link teilen</span></li>
+                <li class="nz-step"><span class="nz-step__dot">3</span><span class="nz-step__label">Bester Termin gewinnt</span></li>
+            </ol>
+        </section>
 
-        <div id="configSection" class="card config-section">
-            <h2>Firebase &amp; Google Sheets Konfiguration</h2>
-            <p>Geben Sie Ihre Firebase-Konfiguration und Google Sheets API-Schlüssel ein:</p>
+        <div id="firebaseStatus" class="hidden" role="status" aria-live="polite"></div>
 
-            <div class="form-group">
-                <label for="firebaseConfig">Firebase Config (JSON):</label>
-                <textarea id="firebaseConfig" rows="8" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..."}'></textarea>
+        <section id="configSavedNotice" class="saved-notice hidden">
+            <span class="nz-dot" aria-hidden="true"></span>
+            <span>Verbindung gespeichert.</span>
+            <span class="saved-notice__actions">
+                <button type="button" onclick="toggleConfig()" class="nz-btn nz-btn--ghost nz-btn--sm">Ändern</button>
+                <button type="button" onclick="clearConfig()" class="nz-btn nz-btn--ghost nz-btn--sm">Löschen</button>
+            </span>
+        </section>
+
+        <section id="configSection" class="nz-card panel">
+            <div class="nz-label">Einrichtung</div>
+            <h2>Verbindung.</h2>
+            <p class="nz-muted">Einmal pro Browser. Die Angaben bleiben nur hier gespeichert.</p>
+
+            <label class="nz-field">
+                <span class="nz-field__label">Firebase-Konfiguration (JSON)</span>
+                <textarea id="firebaseConfig" class="nz-textarea mono" rows="6" spellcheck="false"
+                    placeholder='{"apiKey": "…", "authDomain": "…", "projectId": "…", "storageBucket": "…", "messagingSenderId": "…", "appId": "…"}'></textarea>
+            </label>
+            <div class="row-2">
+                <label class="nz-field">
+                    <span class="nz-field__label">Google Sheets API Key</span>
+                    <input type="text" id="googleSheetsKey" class="nz-input mono" placeholder="AIzaSy…" spellcheck="false" />
+                    <span class="nz-field__hint">Optional, nur für den Export.</span>
+                </label>
+                <label class="nz-field">
+                    <span class="nz-field__label">Spreadsheet-ID</span>
+                    <input type="text" id="spreadsheetId" class="nz-input mono" placeholder="1BxiMVs0XRA5nF…" spellcheck="false" />
+                    <span class="nz-field__hint">Optional. Leer lassen für eine neue Tabelle.</span>
+                </label>
             </div>
-
-            <div class="form-group">
-                <label for="googleSheetsKey">Google Sheets API Key (optional, nur für den Export):</label>
-                <input type="text" id="googleSheetsKey" placeholder="AIzaSy..." />
+            <div class="actions">
+                <button type="button" onclick="initializeFirebase()" class="nz-btn nz-btn--primary">Verbinden</button>
+                <button type="button" onclick="clearConfig()" class="nz-btn nz-btn--ghost">Eingaben löschen</button>
             </div>
+        </section>
 
-            <div class="form-group">
-                <label for="spreadsheetId">Google Spreadsheet ID (optional):</label>
-                <input type="text" id="spreadsheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms" />
-            </div>
+        <section id="createSection" class="nz-card nz-card--raised panel">
+            <div class="nz-label">Schritt 1</div>
+            <h2>Neue Umfrage.</h2>
 
-            <button onclick="initializeFirebase()" class="btn btn-success">Verbindung herstellen</button>
-            <button onclick="toggleConfig()" class="btn btn-small">Konfiguration ausblenden</button>
-            <button onclick="clearConfig()" class="btn btn-danger btn-small">Konfiguration löschen</button>
-        </div>
+            <label class="nz-field">
+                <span class="nz-field__label">Titel</span>
+                <input type="text" id="pollTitle" class="nz-input" placeholder="z. B. Team-Meeting März" />
+            </label>
 
-        <div id="createSection" class="card">
-            <h2>Neue Terminumfrage erstellen</h2>
-            <div class="form-group">
-                <label for="pollTitle">Titel der Umfrage:</label>
-                <input type="text" id="pollTitle" placeholder="z.B. Team Meeting März" />
-            </div>
-
-            <div class="form-group">
-                <label>Terminoptionen:</label>
-                <div class="options-list">
-                    <div id="optionsList"></div>
-                    <div style="margin-top: 15px;">
-                        <input type="datetime-local" id="newOption" style="margin-bottom: 10px;" />
-                        <button onclick="addOption()" class="btn btn-small">Termin hinzufügen</button>
-                    </div>
+            <div class="nz-field">
+                <span class="nz-field__label">Termine</span>
+                <div id="optionsList" class="options" role="list"></div>
+                <p id="optionsEmpty" class="options-empty">Noch kein Termin. Wähle Datum und Uhrzeit und füge ihn hinzu.</p>
+                <div class="add-option">
+                    <input type="datetime-local" id="newOption" class="nz-input" aria-label="Datum und Uhrzeit" />
+                    <button type="button" onclick="addOption()" class="nz-btn nz-btn--secondary">Termin hinzufügen</button>
                 </div>
             </div>
 
-            <button onclick="createPoll()" class="btn btn-success" id="createPollBtn" disabled>Umfrage erstellen</button>
-        </div>
+            <div class="actions">
+                <button type="button" onclick="createPoll()" class="nz-btn nz-btn--primary nz-btn--lg" id="createPollBtn" disabled>Umfrage erstellen</button>
+            </div>
+        </section>
 
-        <div id="pollSection" class="card hidden">
-            <div id="pollHeader"></div>
+        <section id="pollSection" class="hidden">
+            <div id="pollHeader" class="poll-head"></div>
+
+            <div id="shareSection" class="share hidden">
+                <div class="share__text">
+                    <div class="nz-label">Schritt 2 · Link teilen</div>
+                    <div class="share-url" id="shareUrl"></div>
+                </div>
+                <div class="share__actions">
+                    <button type="button" onclick="copyLink()" class="nz-btn nz-btn--primary">Link kopieren</button>
+                    <button type="button" onclick="exportToSheets()" class="nz-btn nz-btn--secondary" id="exportBtn">Nach Google Sheets</button>
+                </div>
+            </div>
+
             <div id="pollResults" class="poll-table"></div>
-            <div id="participateForm">
-                <h3>An Umfrage teilnehmen</h3>
-                <div class="form-group">
-                    <label for="participantName">Ihr Name:</label>
-                    <input type="text" id="participantName" placeholder="Max Mustermann" />
-                </div>
-                <button onclick="addParticipant()" class="btn" id="participateBtn">Teilnehmen</button>
 
-                <div id="instructionsBanner" class="instructions-banner hidden">
-                    <div class="icon">👆</div>
-                    <strong>Klicken Sie auf die Termine in der Tabelle</strong> um Ihre Verfügbarkeit anzugeben!
-                    <br />
-                    <small>Ihre Auswahl wird automatisch gespeichert</small>
-                </div>
+            <div id="legend" class="legend hidden" aria-label="Legende">
+                <span><span class="mark is-yes" aria-hidden="true">✓</span> Verfügbar</span>
+                <span><span class="mark is-maybe" aria-hidden="true">?</span> Vielleicht</span>
+                <span><span class="mark is-no" aria-hidden="true">✗</span> Nicht verfügbar</span>
+                <span><span class="mark is-open" aria-hidden="true"></span> Keine Angabe</span>
+            </div>
 
-                <div id="legend" class="legend hidden">
-                    <div class="legend-title">Bedeutung der Symbole:</div>
-                    <span class="status-indicator status-available">✓ Verfügbar</span>
-                    <span class="status-indicator status-maybe">? Vielleicht</span>
-                    <span class="status-indicator status-unavailable">✗ Nicht verfügbar</span>
+            <div id="participateForm" class="nz-card panel">
+                <div class="nz-label">Mitmachen</div>
+                <h3>Wann kannst du?</h3>
+                <div class="add-option">
+                    <input type="text" id="participantName" class="nz-input" placeholder="Dein Name" aria-label="Dein Name" />
+                    <button type="button" onclick="addParticipant()" class="nz-btn nz-btn--primary" id="participateBtn">Teilnehmen</button>
                 </div>
             </div>
 
-            <div id="shareSection" class="share-section hidden">
-                <h3>📤 Umfrage teilen</h3>
-                <p>Teilen Sie diesen Link mit allen Teilnehmern:</p>
-                <div class="share-url" id="shareUrl"></div>
-                <button onclick="copyLink()" class="btn btn-small">Link kopieren</button>
-                <button onclick="exportToSheets()" class="btn btn-small" id="exportBtn">Export zu Google Sheets</button>
+            <div id="instructionsBanner" class="nz-alert nz-alert--signal hidden">
+                <div><div class="nz-alert__title">Du bist dabei.</div>
+                <div class="nz-alert__body">Klick in deiner Zeile auf einen Termin: einmal <b>verfügbar</b>, zweimal <b>vielleicht</b>, dreimal <b>nicht verfügbar</b>. Alles wird sofort gespeichert.</div></div>
             </div>
 
-            <div id="sheetsSection" class="sheets-section hidden">
-                <h3>Google Sheets Export</h3>
-                <p>Die Umfrageergebnisse wurden erfolgreich exportiert:</p>
-                <div id="sheetsUrl"></div>
+            <div id="sheetsSection" class="nz-alert nz-alert--info hidden">
+                <div><div class="nz-alert__title">Exportiert.</div>
+                <div class="nz-alert__body" id="sheetsUrl"></div></div>
             </div>
-        </div>
+        </section>
 
-        <div id="loading" class="loading hidden">Lädt...</div>
-    </div>
+        <div id="loading" class="loading hidden" role="status"><span class="nz-spinner" aria-hidden="true"></span> Lädt …</div>
+
+        <footer class="foot">
+            <span class="nz-label">nozilla · Gute digitale Dienste.</span>
+            <a class="nz-label" href="mailto:contact@nozilla.de">contact@nozilla.de</a>
+        </footer>
+    </main>
 
     <!-- Firebase-SDK aus der offiziellen Quelle, Version fest gepinnt -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <!-- Optional: Projekt-Konfiguration, damit Teilnehmende nichts eintragen müssen -->
     <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daimpad/nozilla-ci@71939b3d4a01f3f181f2e6dc86783bae8654f2f9/design-system.js"></script>
 
     <script>
         let db = null;
@@ -644,7 +270,9 @@
 
                 db = firebase.firestore();
 
-                await db.collection('polls').limit(1).get();
+                // Einzelnes Dokument statt Liste: so reicht eine Regel, die Umfragen
+                // lesbar macht, ohne dass jemand alle Umfragen auflisten kann.
+                await db.collection('polls').doc('_verbindungstest').get();
 
                 if (!useSaved) {
                     localStorage.setItem('firebase_config', configText);
@@ -679,8 +307,9 @@
 
         function showFirebaseStatus(message, type) {
             const statusDiv = document.getElementById('firebaseStatus');
-            statusDiv.textContent = message;
-            statusDiv.className = `firebase-status firebase-${type === 'success' ? 'connected' : 'error'}`;
+            statusDiv.className = `nz-alert nz-alert--${type === 'success' ? 'signal' : 'danger'} status`;
+            statusDiv.innerHTML = `<div><div class="nz-alert__title">${type === 'success' ? 'Verbunden.' : 'Keine Verbindung.'}</div>`
+                + `<div class="nz-alert__body">${esc(message)}</div></div>`;
             statusDiv.classList.remove('hidden');
 
             if (type === 'success') {
@@ -746,9 +375,11 @@
             pollData.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option-item';
+                optionDiv.setAttribute('role', 'listitem');
                 optionDiv.innerHTML = `
-                    <span>${esc(option.formatted)}</span>
-                    <button onclick="removeOption(${index})" class="btn btn-danger btn-small">Entfernen</button>
+                    <span class="option-item__no">${String(index + 1).padStart(2, '0')}</span>
+                    <span class="option-item__text">${esc(option.formatted)}</span>
+                    <button type="button" onclick="removeOption(${index})" class="nz-btn nz-btn--ghost nz-btn--sm">Entfernen</button>
                 `;
                 optionsList.appendChild(optionDiv);
             });
@@ -758,6 +389,13 @@
             pollData.options.splice(index, 1);
             renderOptions();
         }
+
+        // Ohne Termine gibt es nichts zu erstellen: Knopf und Hinweis folgen der Liste
+        const _renderOptions = renderOptions;
+        renderOptions = function () {
+            _renderOptions();
+            document.getElementById('optionsEmpty').classList.toggle('hidden', pollData.options.length > 0);
+        };
 
         async function createPoll() {
             const title = document.getElementById('pollTitle').value;
@@ -845,11 +483,13 @@
             document.getElementById('createSection').classList.add('hidden');
             document.getElementById('pollSection').classList.remove('hidden');
 
-            const createdDate = poll.created ? (poll.created.toDate ? poll.created.toDate() : new Date(poll.created)) : new Date();
+            // Direkt nach dem Anlegen steht hier noch der Platzhalter für den Server-Zeitstempel
+            let createdDate = poll.created && poll.created.toDate ? poll.created.toDate() : new Date(poll.created);
+            if (isNaN(createdDate)) createdDate = new Date();
 
             document.getElementById('pollHeader').innerHTML = `
+                <div class="nz-label">Umfrage · erstellt am ${esc(createdDate.toLocaleString('de-DE'))}</div>
                 <h2>${esc(poll.title)}</h2>
-                <p>Erstellt am: ${createdDate.toLocaleString('de-DE')}</p>
             `;
 
             renderPollTable();
@@ -869,6 +509,10 @@
                 return;
             }
 
+            // Vor dem Schreiben merken: Firestore meldet die eigene Änderung sofort zurück,
+            // und die Tabelle braucht den Namen, um die eigene Zeile anklickbar zu machen.
+            currentParticipant = name;
+
             try {
                 showLoading(true);
 
@@ -881,13 +525,14 @@
                     'lastModified', firebase.firestore.FieldValue.serverTimestamp()
                 );
 
-                currentParticipant = name;
                 nameInput.value = '';
+                renderPollTable();
 
                 document.getElementById('instructionsBanner').classList.remove('hidden');
                 document.getElementById('legend').classList.remove('hidden');
                 document.getElementById('participateForm').style.display = 'none';
             } catch (error) {
+                currentParticipant = null;
                 console.error('Fehler beim Hinzufügen des Teilnehmers:', error);
                 alert('Fehler beim Hinzufügen des Teilnehmers: ' + error.message);
             } finally {
@@ -895,56 +540,50 @@
             }
         }
 
+        const STATES = {
+            '1':   { cls: 'is-yes',   sym: '✓', label: 'Verfügbar' },
+            '0.5': { cls: 'is-maybe', sym: '?', label: 'Vielleicht' },
+            '-1':  { cls: 'is-no',    sym: '✗', label: 'Nicht verfügbar' },
+            '0':   { cls: 'is-open',  sym: '',  label: 'Keine Angabe' }
+        };
+
         function renderPollTable() {
             const resultsDiv = document.getElementById('pollResults');
 
             if (!currentPoll.participants || currentPoll.participants.length === 0) {
-                resultsDiv.innerHTML = '<p>Noch keine Teilnehmer. Bitte geben Sie unten Ihren Namen ein.</p>';
+                resultsDiv.innerHTML = `<div class="nz-empty">
+                    <div class="nz-empty__title">Noch niemand dabei.</div>
+                    <p class="nz-empty__body">Trag unten deinen Namen ein und wähle deine Termine.</p></div>`;
                 return;
             }
 
-            let table = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Teilnehmer</th>
-                            ${currentPoll.options.map(option => `<th>${esc(option.formatted)}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            const counts = currentPoll.options.map((o, i) =>
+                currentPoll.participants.filter(p => currentPoll.responses[p] && currentPoll.responses[p][i] === 1).length);
+            const best = Math.max(...counts);
+
+            let table = `<table class="nz-table poll"><thead><tr><th scope="col">Teilnehmende</th>
+                ${currentPoll.options.map((option, i) => `<th scope="col" class="${best > 0 && counts[i] === best ? 'is-best' : ''}">
+                    ${esc(option.formatted)}${best > 0 && counts[i] === best ? '<span class="best-tag">Bester Termin</span>' : ''}</th>`).join('')}
+                </tr></thead><tbody>`;
 
             currentPoll.participants.forEach(participant => {
-                table += `<tr><td><strong>${esc(participant)}</strong></td>`;
+                const mine = participant === currentParticipant;
+                table += `<tr class="${mine ? 'is-mine' : ''}"><th scope="row">${esc(participant)}${mine ? ' <span class="nz-label">du</span>' : ''}</th>`;
                 const responses = currentPoll.responses[participant] || [];
                 responses.forEach((response, optionIndex) => {
-                    const cellClass = response === 1 ? 'available' : response === -1 ? 'unavailable' : response === 0.5 ? 'maybe' : '';
-                    const isClickable = participant === currentParticipant;
-                    const clickHandler = isClickable ? `onclick="toggleResponse(${optionIndex})"` : '';
-                    const clickableClass = isClickable && response === 0 ? 'clickable' : '';
-
-                    let indicatorContent = '';
-                    if (response === 1) {
-                        indicatorContent = '<div class="response-indicator filled">✓</div>';
-                    } else if (response === -1) {
-                        indicatorContent = '<div class="response-indicator filled">✗</div>';
-                    } else if (response === 0.5) {
-                        indicatorContent = '<div class="response-indicator filled">?</div>';
-                    } else {
-                        indicatorContent = '<div class="response-indicator">−</div>';
-                    }
-
-                    table += `<td class="response-cell ${cellClass} ${clickableClass}" ${clickHandler} title="${isClickable ? 'Klicken zum Ändern' : ''}">${indicatorContent}</td>`;
+                    const st = STATES[String(response)] || STATES['0'];
+                    const cell = `<span class="mark ${st.cls}" aria-hidden="true">${st.sym}</span><span class="nz-sr-only">${st.label}</span>`;
+                    table += mine
+                        ? `<td class="cell"><button type="button" class="cell-btn" onclick="toggleResponse(${optionIndex})"
+                              title="${st.label} — klicken zum Ändern">${cell}</button></td>`
+                        : `<td class="cell">${cell}</td>`;
                 });
                 table += '</tr>';
             });
 
-            table += '<tr class="summary-row"><td><strong>✓ Verfügbar</strong></td>';
-            currentPoll.options.forEach((option, index) => {
-                const availableCount = currentPoll.participants.filter(p => currentPoll.responses[p] && currentPoll.responses[p][index] === 1).length;
-                table += `<td><strong>${availableCount}</strong></td>`;
-            });
-            table += '</tr></tbody></table>';
+            table += `<tr class="summary-row"><th scope="row">Verfügbar</th>
+                ${counts.map((c, i) => `<td class="cell ${best > 0 && c === best ? 'is-best' : ''}">${c}</td>`).join('')}</tr>`;
+            table += '</tbody></table>';
 
             resultsDiv.innerHTML = table;
         }
@@ -975,7 +614,7 @@
                 );
 
                 if (newResponse !== 0) {
-                    showTemporaryFeedback('Gespeichert! ✓');
+                    showTemporaryFeedback('Gespeichert.');
                 }
             } catch (error) {
                 console.error('Fehler beim Aktualisieren der Antwort:', error);
@@ -984,36 +623,7 @@
         }
 
         function showTemporaryFeedback(message) {
-            const feedback = document.createElement('div');
-            feedback.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #53f9ac;
-                color: #000;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-weight: 600;
-                z-index: 1000;
-                animation: slideInOut 2s ease-in-out;
-            `;
-            feedback.textContent = message;
-
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideInOut {
-                    0% { transform: translateX(100%); opacity: 0; }
-                    20%, 80% { transform: translateX(0); opacity: 1; }
-                    100% { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            document.body.appendChild(feedback);
-
-            setTimeout(() => {
-                document.body.removeChild(feedback);
-                document.head.removeChild(style);
-            }, 2000);
+            if (window.nz && nz.toast) nz.toast({ title: message, variant: 'signal', timeout: 1600 });
         }
 
         function showShareSection() {
@@ -1027,7 +637,7 @@
         function copyLink() {
             const shareUrl = document.getElementById('shareUrl').textContent;
             navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('Link wurde in die Zwischenablage kopiert!');
+                showTemporaryFeedback('Link kopiert.');
             });
         }
 
@@ -1053,7 +663,7 @@
 
                 const sheetsUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
                 document.getElementById('sheetsSection').classList.remove('hidden');
-                document.getElementById('sheetsUrl').innerHTML = `<a href="${esc(sheetsUrl)}" target="_blank" rel="noopener">${esc(sheetsUrl)}</a>`;
+                document.getElementById('sheetsUrl').innerHTML = `<a class="share-url" href="${esc(sheetsUrl)}" target="_blank" rel="noopener">${esc(sheetsUrl)}</a>`;
             } catch (error) {
                 console.error('Fehler beim Export zu Google Sheets:', error);
                 alert('Fehler beim Export: ' + error.message);
