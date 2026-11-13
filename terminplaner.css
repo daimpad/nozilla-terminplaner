@@ -179,3 +179,34 @@
   .row-title { grid-template-columns: 1fr; gap: 0; }
   .best__actions, .best__actions .nz-btn { width: 100%; }
 }
+
+/* ── Abgleich mit dem eigenen Kalender ─────────────────────────────────── */
+.slot-status { font-size: var(--nz-text-sm); color: var(--nz-text-muted); margin: var(--nz-space-2) 0 0; min-height: 1.4em; }
+.slot-tag {
+  display: inline-block; padding: 2px 8px; white-space: nowrap;
+  font-family: var(--nz-font-mono); font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  border: var(--nz-stroke-rule) solid var(--nz-line-soft); color: var(--nz-text-muted);
+}
+/* frei: Grün markiert, was geht; belegt: Tinte, kein Rot außerhalb der Palette */
+.slot-tag.is-free { background: var(--nz-signal); color: var(--nz-on-signal); border-color: var(--nz-line); }
+.slot-tag.is-busy { background: var(--nz-text); color: var(--nz-bg); border-color: var(--nz-text); }
+
+.calcheck {
+  margin: 0 0 var(--nz-space-5); padding: var(--nz-space-4);
+  border: var(--nz-stroke-rule) dashed var(--nz-line);
+}
+.calcheck__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--nz-space-4); flex-wrap: wrap; }
+.calcheck__status { font-size: var(--nz-text-sm); color: var(--nz-text-muted); margin: 4px 0 0; max-width: 52ch; }
+.calcheck__status.is-warn { color: var(--nz-text); font-weight: 600; }
+.calcheck__list { display: flex; flex-wrap: wrap; gap: var(--nz-space-2) var(--nz-space-4); margin-top: var(--nz-space-4); }
+.calcheck__item { display: inline-flex; align-items: center; gap: 8px; font-size: var(--nz-text-sm); cursor: pointer; }
+.calcheck__item input { width: 18px; height: 18px; accent-color: var(--nz-c-green); }
+.calcheck__suggest { margin-top: var(--nz-space-4); }
+.calcheck__chips { display: flex; flex-wrap: wrap; gap: var(--nz-space-2); margin-top: var(--nz-space-2); }
+.calcheck__chip {
+  font-family: var(--nz-font-mono); font-weight: 700; font-size: 12px; cursor: pointer;
+  padding: 8px 12px; background: var(--nz-surface); color: var(--nz-text);
+  border: var(--nz-stroke-rule) solid var(--nz-line); border-radius: 0; box-shadow: 3px 3px 0 0 var(--nz-shadow-color);
+}
+.calcheck__chip:hover { background: var(--nz-signal); color: var(--nz-on-signal); }
+.calcheck__chip:active { transform: translate(3px, 3px); box-shadow: none; }

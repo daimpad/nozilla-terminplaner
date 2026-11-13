@@ -98,6 +98,20 @@
                     <input type="datetime-local" id="newOption" class="nz-input" aria-label="Datum und Uhrzeit" />
                     <button type="button" onclick="addOption()" class="nz-btn nz-btn--secondary">Termin hinzufügen</button>
                 </div>
+                <p id="newOptionStatus" class="slot-status" aria-live="polite"></p>
+            </div>
+
+            <!-- Kalenderabgleich: erscheint nur, wenn eine Google-Client-ID eingetragen ist (kalender.js) -->
+            <div id="calPanel" class="calcheck hidden">
+                <div class="calcheck__head">
+                    <div>
+                        <div class="nz-label">Dein Kalender</div>
+                        <p id="calStatus" class="calcheck__status">Zeigt neben jedem Termin, ob du frei bist. Abgefragt wird nur frei oder belegt, nie Inhalte.</p>
+                    </div>
+                    <button type="button" id="calConnect" onclick="calConnect()" class="nz-btn nz-btn--secondary nz-btn--sm">Mit Google-Kalender abgleichen</button>
+                </div>
+                <div id="calList" class="calcheck__list hidden"></div>
+                <div id="calSuggest" class="calcheck__suggest hidden"></div>
             </div>
 
             <div class="actions">
@@ -163,6 +177,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <!-- Optional: Projekt-Konfiguration, damit Teilnehmende nichts eintragen müssen -->
     <script src="config.js"></script>
+    <script src="kalender.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/daimpad/nozilla-ci@71939b3d4a01f3f181f2e6dc86783bae8654f2f9/design-system.js"></script>
 
     <script>
@@ -337,7 +352,8 @@
         function setDefaultDateTime() {
             const now = new Date();
             const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-            const isoString = tomorrow.toISOString().slice(0, 16);
+            // Ortszeit, nicht UTC: toISOString() lag in Deutschland ein bis zwei Stunden daneben
+            const isoString = new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
             const newOptionInput = document.getElementById('newOption');
             if (newOptionInput) {
                 newOptionInput.value = isoString;
@@ -394,6 +410,7 @@
                 optionDiv.innerHTML = `
                     <span class="option-item__no">${String(index + 1).padStart(2, '0')}</span>
                     <span class="option-item__text">${esc(option.formatted)}</span>
+                    ${window.calSlotTag ? calSlotTag(option.datetime) : ''}
                     <button type="button" onclick="removeOption(${index})" class="nz-btn nz-btn--ghost nz-btn--sm">Entfernen</button>
                 `;
                 optionsList.appendChild(optionDiv);
