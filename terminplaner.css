@@ -1,0 +1,160 @@
+/* ============================================================================
+   nozilla Terminplaner — Ergänzungen zum Design System
+   Farben, Schriften, Buttons, Felder, Tabelle, Hinweise und Toasts kommen aus
+   design-system.css. Hier steht nur, was dieses Werkzeug zusätzlich braucht.
+============================================================================ */
+
+.hidden { display: none !important; }
+
+.page {
+  max-width: 880px; margin-inline: auto;
+  padding: var(--nz-space-6) var(--nz-space-5) var(--nz-space-8);
+}
+
+/* ── Kopf ──────────────────────────────────────────────────────────────── */
+.masthead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--nz-space-4);
+  padding-bottom: var(--nz-space-4); margin-bottom: var(--nz-space-7);
+  border-bottom: var(--nz-stroke-rule) solid var(--nz-line);
+}
+.wordmark {
+  font-family: var(--nz-font-display); font-weight: 700; font-size: 26px; line-height: 1;
+  color: var(--nz-text); text-decoration: none; letter-spacing: -0.01em;
+}
+.wordmark span { color: var(--nz-signal); }
+
+.intro { margin-bottom: var(--nz-space-7); }
+.intro h1 { font-size: clamp(44px, 8vw, 80px); line-height: .95; margin: 0 0 var(--nz-space-4); }
+.intro__lede {
+  font-family: var(--nz-font-display); font-size: 21px; line-height: 1.35;
+  color: var(--nz-text-muted); max-width: 46ch; margin: 0 0 var(--nz-space-6);
+}
+.intro__steps { margin: 0; }
+
+/* ── Karten ────────────────────────────────────────────────────────────── */
+.panel { margin-bottom: var(--nz-space-6); }
+.panel h2, .panel h3 { margin: var(--nz-space-2) 0 var(--nz-space-4); }
+.panel h2 { font-size: 30px; }
+.panel h3 { font-size: 22px; }
+.panel > .nz-muted { margin: calc(-1 * var(--nz-space-2)) 0 var(--nz-space-5); }
+.panel .nz-field { margin-bottom: var(--nz-space-5); }
+.mono { font-family: var(--nz-font-mono); font-size: 13px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--nz-space-4); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--nz-space-3); align-items: center; }
+
+.status { margin-bottom: var(--nz-space-5); }
+.saved-notice {
+  display: flex; align-items: center; gap: var(--nz-space-3); flex-wrap: wrap;
+  margin-bottom: var(--nz-space-5); font-size: var(--nz-text-sm); color: var(--nz-text-muted);
+}
+.saved-notice__actions { margin-left: auto; display: flex; gap: var(--nz-space-2); }
+
+/* ── Terminliste ───────────────────────────────────────────────────────── */
+.options { border-top: var(--nz-stroke-rule) solid var(--nz-line); }
+.options:empty { border-top: 0; }
+.option-item {
+  display: flex; align-items: center; gap: var(--nz-space-3);
+  padding: 10px 0; border-bottom: var(--nz-stroke-hair) solid var(--nz-line-soft);
+}
+.option-item__no { font-family: var(--nz-font-mono); font-weight: 700; font-size: 12px; color: var(--nz-text-muted); }
+.option-item__text { flex: 1; min-width: 0; }
+.options-empty { font-size: var(--nz-text-sm); color: var(--nz-text-muted); margin: 0 0 var(--nz-space-3); }
+.add-option { display: flex; gap: var(--nz-space-3); margin-top: var(--nz-space-3); }
+.add-option .nz-input { flex: 1; min-width: 0; }
+
+/* ── Umfrage ───────────────────────────────────────────────────────────── */
+.poll-head { margin-bottom: var(--nz-space-5); }
+.poll-head h2 { font-size: clamp(32px, 5vw, 48px); line-height: 1; margin: var(--nz-space-2) 0 0; overflow-wrap: anywhere; }
+
+.share {
+  display: flex; align-items: center; gap: var(--nz-space-4); flex-wrap: wrap;
+  padding: var(--nz-space-4); margin-bottom: var(--nz-space-6);
+  background: var(--nz-surface); border: var(--nz-stroke-strong) solid var(--nz-line);
+  box-shadow: var(--nz-shadow-md);
+}
+.share__text { flex: 1; min-width: 0; }
+.share__actions { display: flex; gap: var(--nz-space-3); flex-wrap: wrap; }
+.share-url {
+  display: block; margin-top: 6px; font-family: var(--nz-font-mono); font-size: 13px;
+  color: var(--nz-text); overflow-wrap: anywhere;
+}
+
+/* position: relative hält auch die absolut positionierten Screenreader-Texte
+   in den Zellen im Scrollbereich — sonst verbreitern sie die ganze Seite. */
+.poll-table {
+  position: relative; overflow-x: auto; margin-bottom: var(--nz-space-4);
+  border: var(--nz-stroke-rule) solid var(--nz-line); background: var(--nz-surface);
+}
+.poll-table .nz-empty { border: 0; }
+.poll { min-width: 100%; }
+.poll th, .poll td { vertical-align: middle; }
+.poll thead th { min-width: 140px; }
+.poll thead th:first-child, .poll tbody th { min-width: 150px; }
+.poll tbody th { font-weight: 600; white-space: nowrap; }
+.poll .cell { text-align: center; padding: 6px; }
+.poll tr.is-mine { background: var(--nz-surface-alt); }
+.poll th.is-best { background: var(--nz-signal); color: var(--nz-on-signal); }
+.best-tag {
+  display: block; margin-top: 4px; font-family: var(--nz-font-mono); font-weight: 700;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+}
+.summary-row th, .summary-row td {
+  font-family: var(--nz-font-display); font-weight: 700; font-size: 20px;
+  border-top: var(--nz-stroke-rule) solid var(--nz-line);
+}
+.summary-row th { font-family: var(--nz-font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.summary-row td.is-best { background: var(--nz-signal); color: var(--nz-on-signal); }
+
+/* Antwort-Marken: Symbol und Fläche tragen die Bedeutung gemeinsam,
+   damit sie auch ohne Farbsehen lesbar sind. Nur Palette: Grün, Papier, Tinte. */
+.mark {
+  display: inline-grid; place-items: center; width: 32px; height: 32px;
+  font-family: var(--nz-font-mono); font-weight: 700; font-size: 16px; line-height: 1;
+  border: var(--nz-stroke-rule) solid var(--nz-line);
+}
+.mark.is-yes   { background: var(--nz-signal); color: var(--nz-on-signal); }
+.mark.is-maybe { background: var(--nz-surface); color: var(--nz-text); }
+.mark.is-no    { background: var(--nz-text); color: var(--nz-bg); }
+.mark.is-open  { border-style: dashed; border-color: var(--nz-line-soft); background: transparent; }
+
+.cell-btn {
+  display: inline-grid; place-items: center; padding: 4px; border: 0; background: transparent;
+  cursor: pointer; border-radius: 0;
+}
+.cell-btn .mark { box-shadow: 3px 3px 0 0 var(--nz-shadow-color); transition: transform var(--nz-dur) var(--nz-ease), box-shadow var(--nz-dur) var(--nz-ease); }
+.cell-btn .mark.is-open { border-style: solid; border-color: var(--nz-line); background: var(--nz-surface); }
+.cell-btn:hover .mark { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 0 var(--nz-shadow-color); }
+.cell-btn:active .mark { transform: translate(3px, 3px); box-shadow: none; }
+.cell-btn:focus-visible { outline: var(--nz-stroke-strong) solid var(--nz-focus); outline-offset: 2px; }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: var(--nz-space-4); margin-bottom: var(--nz-space-6);
+  font-size: var(--nz-text-sm); color: var(--nz-text-muted);
+}
+.legend > span { display: inline-flex; align-items: center; gap: 8px; }
+.legend .mark { width: 22px; height: 22px; font-size: 12px; }
+
+#instructionsBanner, #sheetsSection { margin-bottom: var(--nz-space-6); }
+
+.loading {
+  position: fixed; left: 50%; top: var(--nz-space-5); transform: translateX(-50%); z-index: 70;
+  display: flex; align-items: center; gap: var(--nz-space-3); padding: 10px 16px;
+  background: var(--nz-surface); border: var(--nz-stroke-rule) solid var(--nz-line); box-shadow: var(--nz-shadow-md);
+  font-family: var(--nz-font-mono); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+}
+.loading .nz-spinner { width: 18px; height: 18px; border-width: 3px; }
+
+.foot {
+  display: flex; justify-content: space-between; gap: var(--nz-space-4); flex-wrap: wrap;
+  margin-top: var(--nz-space-8); padding-top: var(--nz-space-4);
+  border-top: var(--nz-stroke-rule) solid var(--nz-line);
+}
+.foot a { color: inherit; }
+
+@media (max-width: 640px) {
+  .page { padding: var(--nz-space-4) var(--nz-space-4) var(--nz-space-7); }
+  .masthead { margin-bottom: var(--nz-space-6); }
+  .row-2 { grid-template-columns: 1fr; }
+  .add-option { flex-direction: column; }
+  .share__actions, .share__actions .nz-btn { width: 100%; }
+}
