@@ -1,19 +1,23 @@
-/* Firebase-Konfiguration des nozilla-Projekts.
+/* Konfiguration des Terminplaners.
  *
- * Steht hier eine Konfiguration, verbindet sich der Terminplaner automatisch —
- * Teilnehmende, die einen Umfrage-Link öffnen, müssen dann nichts eintragen.
- * Bleibt der Wert null, fragt die Seite wie bisher nach der Konfiguration.
+ * In diesem Repository bleiben beide Werte leer. Beim Veröffentlichen über
+ * GitHub Pages schreibt der Workflow (.github/workflows/pages.yml) diese Datei
+ * aus den Repository-Variablen FIREBASE_CONFIG und GOOGLE_CLIENT_ID neu.
+ * Wer die Seite selbst hostet, legt eine ausgefüllte config.js daneben,
+ * zum Beispiel per FTP.
  *
- * Die Web-Konfiguration von Firebase ist kein Geheimnis: Sie steht ohnehin in
- * jedem ausgelieferten Browser-Code. Geschützt werden die Daten über die
- * Firestore-Sicherheitsregeln im Firebase-Projekt, nicht über diese Werte.
- * Den Wert findest du in der Firebase-Konsole unter
- * Projekteinstellungen › Allgemein › Deine Apps › SDK-Einrichtung › Konfiguration.
+ * Beide Werte sind kein Geheimnis: Sie stehen bei jeder Web-App im
+ * ausgelieferten Browser-Code. Geschützt wird anders, die Daten über die
+ * Firestore-Sicherheitsregeln, die Google-Anmeldung über die Liste erlaubter
+ * Adressen in der Google Cloud Console.
  */
+
+/* Firebase: Projekteinstellungen › Allgemein › Deine Apps › Konfiguration.
+ * Steht hier eine Konfiguration, verbindet sich die Seite für alle von selbst.
+ * Bleibt sie null, fragt die Seite in jedem Browser einmal danach. */
 window.NZ_FIREBASE_CONFIG = null;
-/* Beispiel:
-window.NZ_FIREBASE_CONFIG = {
-  apiKey: "…", authDomain: "…", projectId: "…",
-  storageBucket: "…", messagingSenderId: "…", appId: "…"
-};
-*/
+
+/* Google: OAuth-Client-ID (Typ „Webanwendung"), endet auf
+ * .apps.googleusercontent.com. Ist sie gesetzt, erscheint beim Anlegen einer
+ * Umfrage der Abgleich mit dem eigenen Google-Kalender. */
+window.NZ_GOOGLE_CLIENT_ID = null;

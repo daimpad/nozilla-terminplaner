@@ -10,15 +10,33 @@ Eine einzelne HTML-Seite ohne Build-Schritt. Die Daten liegen in Firebase Firest
 |---|---|
 | `index.html` | Seite und Logik |
 | `terminplaner.css` | Ergänzungen zum Design System, nur was dieses Werkzeug zusätzlich braucht |
-| `config.js` | Firebase-Konfiguration des Projekts (optional, siehe unten) |
+| `kalender.js` | Abgleich mit dem eigenen Google-Kalender (optional, siehe unten) |
+| `config.js` | Firebase-Konfiguration und Google-Client-ID. Im Repository leer |
+
+## Konfiguration
+
+Der Terminplaner braucht zwei Werte. **Beide stehen nicht im Code**, sondern als Variablen im Repository. Beim Veröffentlichen schreibt der Workflow daraus die `config.js`.
+
+*Settings › Secrets and variables › Actions › Tab „Variables" › New repository variable*
+
+| Variable | Wert | Wofür |
+|---|---|---|
+| `FIREBASE_CONFIG` | die Konfiguration aus der Firebase-Konsole, als JSON oder so, wie die Konsole sie anzeigt (`const firebaseConfig = {…}`) | Pflicht. Ohne sie fragt die Seite jeden Besucher nach einer eigenen Konfiguration |
+| `GOOGLE_CLIENT_ID` | die OAuth-Client-ID, endet auf `.apps.googleusercontent.com` | optional, schaltet den Kalenderabgleich ein |
+
+Danach unter *Actions › Veröffentlichen › Run workflow* einmal neu veröffentlichen. Eine fehlerhafte Eingabe bricht die Veröffentlichung mit einer Meldung ab, statt eine kaputte Seite auszuliefern.
+
+**Beide Werte sind kein Geheimnis.** Sie stehen bei jeder Web-App im ausgelieferten Browser-Code. Geschützt wird anders: die Daten über die Firestore-Sicherheitsregeln, die Google-Anmeldung über die Liste erlaubter Adressen in der Google Cloud Console. Die Variablen halten die Werte nur aus der Versionsgeschichte heraus.
+
+**Selbst hosten:** Wer die Seite auf einem eigenen Server ausliefert, legt eine ausgefüllte `config.js` daneben, etwa per FTP. Die Vorlage im Repository zeigt das Format.
 
 ## Firebase einrichten
 
 1. In der [Firebase-Konsole](https://console.firebase.google.com/) ein Projekt anlegen und **Firestore** aktivieren.
 2. Unter *Projekteinstellungen › Allgemein › Deine Apps* eine Web-App anlegen und deren Konfiguration kopieren.
-3. Die Konfiguration in `config.js` eintragen. Dann verbindet sich die Seite für alle automatisch. Ohne `config.js` fragt sie in jedem Browser einmal danach.
+3. Die Konfiguration als Variable `FIREBASE_CONFIG` eintragen (siehe oben).
 
-Die Web-Konfiguration ist kein Geheimnis, sie steht in jedem ausgelieferten Browser-Code. Geschützt werden die Daten über die **Firestore-Sicherheitsregeln**. Ein Vorschlag, der nur das erlaubt, was die Seite tatsächlich tut:
+Ein Vorschlag für die **Firestore-Sicherheitsregeln**, der nur erlaubt, was die Seite tatsächlich tut:
 
 ```
 rules_version = '2';
@@ -38,7 +56,27 @@ service cloud.firestore {
 }
 ```
 
-## Kalender
+## Eigener Kalender abgleichen (optional)
+
+Beim Anlegen einer Umfrage zeigt die Seite neben jedem Termin, ob man selbst **frei** oder **belegt** ist, und schlägt freie Zeiten vor: werktags von 9 bis 17 Uhr, die nächsten zwei Wochen. Man meldet sich dafür mit dem eigenen Google-Konto an.
+
+- **Abgefragt wird nur frei oder belegt**, nie Titel, Orte oder Teilnehmende. Dazu kommt die Liste der Kalender, damit man wählen kann, welche zählen.
+- **Der Zugangsschlüssel bleibt im Browser** und verfällt nach einer Stunde. Gespeichert wird nur, welche Kalender ausgewählt sind.
+- **Nichts davon landet in der Umfrage** oder in Firebase.
+
+**Zwei Google-Konten:** Den zweiten Kalender dem ersten Konto freigeben. Im zweiten Konto unter *Einstellungen › Kalender › Für bestimmte Personen freigeben* das erste Konto eintragen, Berechtigung „Nur Verfügbarkeit (frei/belegt)". Dann reicht eine Anmeldung, und beide Kalender stehen zur Auswahl.
+
+**Einrichten, einmalig:**
+
+1. In der [Google Cloud Console](https://console.cloud.google.com/) ein Projekt anlegen.
+2. *APIs und Dienste › Bibliothek*: **Google Calendar API** aktivieren.
+3. *APIs und Dienste › OAuth-Zustimmungsbildschirm*: Nutzertyp **Extern**, Status **Testing**. Unter *Testnutzer* das eigene Google-Konto eintragen. Im Status Testing prüft Google die App nicht, anmelden können sich aber nur eingetragene Testnutzer. Für ein persönliches Werkzeug ist das genau richtig.
+4. *APIs und Dienste › Anmeldedaten › Anmeldedaten erstellen › OAuth-Client-ID*, Typ **Webanwendung**. Unter *Autorisierte JavaScript-Quellen* die Adresse eintragen, unter der der Terminplaner läuft, ohne Pfad: `https://daimpad.github.io`, später zusätzlich die eigene Subdomain.
+5. Die Client-ID als Variable `GOOGLE_CLIENT_ID` eintragen (siehe oben) und neu veröffentlichen.
+
+Ohne `GOOGLE_CLIENT_ID` bleibt das Feld unsichtbar, und die Seite lädt nichts von Google.
+
+## Bester Termin in den Kalender
 
 Sobald jemand abgestimmt hat, zeigt die Seite unter der Tabelle den **besten Termin** (bei Gleichstand alle) mit zwei Knöpfen:
 

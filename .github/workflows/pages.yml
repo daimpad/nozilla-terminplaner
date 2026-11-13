@@ -31,8 +31,50 @@ jobs:
         run: |
           set -e
           mkdir -p _site
-          cp index.html terminplaner.css config.js _site/
+          cp index.html terminplaner.css kalender.js config.js _site/
           touch _site/.nojekyll
+
+      # Die Konfiguration steht nicht im Code, sondern in den Repository-
+      # Variablen (Settings › Secrets and variables › Actions › Variables).
+      # Fehlt eine Variable, bleibt der Wert aus der config.js im Repository.
+      - name: Konfiguration einsetzen
+        env:
+          FIREBASE_CONFIG: ${{ vars.FIREBASE_CONFIG }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys
+          firebase = os.environ.get("FIREBASE_CONFIG", "").strip()
+          client = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+          if not firebase and not client:
+              print("Keine Variablen gesetzt: config.js aus dem Repository wird ausgeliefert.")
+              sys.exit(0)
+          lines = ["/* Erzeugt beim Veröffentlichen aus den Repository-Variablen. */"]
+          if firebase:
+              # Erlaubt ist das JSON aus der Firebase-Konsole, auch in der
+              # JavaScript-Schreibweise mit Schlüsseln ohne Anführungszeichen.
+              src = firebase.split("=", 1)[1] if firebase.lstrip().startswith(("const", "var", "let")) else firebase
+              src = src.strip().rstrip(";")
+              src = re.sub(r'([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:', r'\1"\2":', src)
+              try:
+                  cfg = json.loads(src)
+              except ValueError as e:
+                  sys.exit(f"FIREBASE_CONFIG ist kein gültiges JSON: {e}")
+              if "projectId" not in cfg:
+                  sys.exit("FIREBASE_CONFIG enthält keine projectId.")
+              lines.append("window.NZ_FIREBASE_CONFIG = " + json.dumps(cfg) + ";")
+          else:
+              lines.append("window.NZ_FIREBASE_CONFIG = null;")
+          if client:
+              if not client.endswith(".apps.googleusercontent.com"):
+                  sys.exit("GOOGLE_CLIENT_ID endet nicht auf .apps.googleusercontent.com.")
+              lines.append("window.NZ_GOOGLE_CLIENT_ID = " + json.dumps(client) + ";")
+          else:
+              lines.append("window.NZ_GOOGLE_CLIENT_ID = null;")
+          open("_site/config.js", "w", encoding="utf-8").write("\n".join(lines) + "\n")
+          print("config.js aus den Variablen erzeugt:",
+                "Firebase" if firebase else "-", "/", "Google" if client else "-")
+          PY
 
       - uses: actions/upload-pages-artifact@v3
         with:
