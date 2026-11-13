@@ -439,7 +439,7 @@
             </div>
 
             <div class="form-group">
-                <label for="googleSheetsKey">Google Sheets API Key:</label>
+                <label for="googleSheetsKey">Google Sheets API Key (optional, nur für den Export):</label>
                 <input type="text" id="googleSheetsKey" placeholder="AIzaSy..." />
             </div>
 
@@ -518,8 +518,11 @@
         <div id="loading" class="loading hidden">Lädt...</div>
     </div>
 
-    <script src="firebase-app-compat.min.js"></script>
-    <script src="firebase-firestore-compat.min.js"></script>
+    <!-- Firebase-SDK aus der offiziellen Quelle, Version fest gepinnt -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <!-- Optional: Projekt-Konfiguration, damit Teilnehmende nichts eintragen müssen -->
+    <script src="config.js"></script>
 
     <script>
         let db = null;
@@ -535,6 +538,14 @@
         let spreadsheetId = null;
         let unsubscribe = null;
 
+        // Alles, was aus der Datenbank oder aus Eingaben kommt, geht maskiert ins HTML.
+        // Sonst könnte ein präparierter Umfragetitel Skripte bei allen Teilnehmenden ausführen.
+        function esc(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             loadSavedConfig();
             setDefaultDateTime();
@@ -546,9 +557,15 @@
             const savedSheetsKey = localStorage.getItem('sheets_api_key');
             const savedSpreadsheetId = localStorage.getItem('spreadsheet_id');
 
-            if (savedConfig && savedSheetsKey) {
+            // Projekt-Konfiguration aus config.js hat Vorrang: dann muss niemand etwas eintragen
+            if (window.NZ_FIREBASE_CONFIG && !savedConfig) {
+                localStorage.setItem('firebase_config', JSON.stringify(window.NZ_FIREBASE_CONFIG));
+                return loadSavedConfig();
+            }
+
+            if (savedConfig) {
                 firebaseConfig = JSON.parse(savedConfig);
-                googleSheetsApiKey = savedSheetsKey;
+                googleSheetsApiKey = savedSheetsKey || null;
                 spreadsheetId = savedSpreadsheetId || null;
 
                 handleConfigStoredState(true);
@@ -613,12 +630,12 @@
                     storedSpreadsheet = document.getElementById('spreadsheetId').value || null;
                 }
 
-                if (!configText || !sheetsKey) {
-                    throw new Error('Firebase-Konfiguration und Google Sheets API Key sind erforderlich');
+                if (!configText) {
+                    throw new Error('Die Firebase-Konfiguration fehlt');
                 }
 
                 firebaseConfig = JSON.parse(configText);
-                googleSheetsApiKey = sheetsKey;
+                googleSheetsApiKey = sheetsKey || null;
                 spreadsheetId = storedSpreadsheet || null;
 
                 if (firebase.apps.length === 0) {
@@ -631,7 +648,11 @@
 
                 if (!useSaved) {
                     localStorage.setItem('firebase_config', configText);
-                    localStorage.setItem('sheets_api_key', googleSheetsApiKey);
+                    if (googleSheetsApiKey) {
+                        localStorage.setItem('sheets_api_key', googleSheetsApiKey);
+                    } else {
+                        localStorage.removeItem('sheets_api_key');
+                    }
                     if (spreadsheetId) {
                         localStorage.setItem('spreadsheet_id', spreadsheetId);
                     } else {
@@ -726,7 +747,7 @@
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option-item';
                 optionDiv.innerHTML = `
-                    <span>${option.formatted}</span>
+                    <span>${esc(option.formatted)}</span>
                     <button onclick="removeOption(${index})" class="btn btn-danger btn-small">Entfernen</button>
                 `;
                 optionsList.appendChild(optionDiv);
@@ -767,6 +788,7 @@
                 currentPoll = { id: docRef.id, ...pollDoc };
 
                 showPoll(currentPoll);
+                setupRealtimeListener(docRef.id);   // sonst erscheinen neue Antworten erst nach Neuladen
                 showShareSection();
 
                 document.getElementById('pollTitle').value = '';
@@ -826,7 +848,7 @@
             const createdDate = poll.created ? (poll.created.toDate ? poll.created.toDate() : new Date(poll.created)) : new Date();
 
             document.getElementById('pollHeader').innerHTML = `
-                <h2>${poll.title}</h2>
+                <h2>${esc(poll.title)}</h2>
                 <p>Erstellt am: ${createdDate.toLocaleString('de-DE')}</p>
             `;
 
@@ -850,15 +872,14 @@
             try {
                 showLoading(true);
 
-                const updatedParticipants = [...(currentPoll.participants || []), name];
-                const updatedResponses = { ...(currentPoll.responses || {}) };
-                updatedResponses[name] = new Array(currentPoll.options.length).fill(0);
-
-                await db.collection('polls').doc(currentPoll.id).update({
-                    participants: updatedParticipants,
-                    responses: updatedResponses,
-                    lastModified: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // Nur den eigenen Eintrag schreiben: wer gleichzeitig teilnimmt,
+                // überschreibt sonst die Antworten der anderen.
+                await db.collection('polls').doc(currentPoll.id).update(
+                    'participants', firebase.firestore.FieldValue.arrayUnion(name),
+                    new firebase.firestore.FieldPath('responses', name),
+                    new Array(currentPoll.options.length).fill(0),
+                    'lastModified', firebase.firestore.FieldValue.serverTimestamp()
+                );
 
                 currentParticipant = name;
                 nameInput.value = '';
@@ -887,14 +908,14 @@
                     <thead>
                         <tr>
                             <th>Teilnehmer</th>
-                            ${currentPoll.options.map(option => `<th>${option.formatted}</th>`).join('')}
+                            ${currentPoll.options.map(option => `<th>${esc(option.formatted)}</th>`).join('')}
                         </tr>
                     </thead>
                     <tbody>
             `;
 
             currentPoll.participants.forEach(participant => {
-                table += `<tr><td><strong>${participant}</strong></td>`;
+                table += `<tr><td><strong>${esc(participant)}</strong></td>`;
                 const responses = currentPoll.responses[participant] || [];
                 responses.forEach((response, optionIndex) => {
                     const cellClass = response === 1 ? 'available' : response === -1 ? 'unavailable' : response === 0.5 ? 'maybe' : '';
@@ -945,13 +966,13 @@
                     newResponse = 0;
                 }
 
-                const updatedResponses = { ...currentPoll.responses };
-                updatedResponses[currentParticipant][optionIndex] = newResponse;
+                const myResponses = [...currentPoll.responses[currentParticipant]];
+                myResponses[optionIndex] = newResponse;
 
-                await db.collection('polls').doc(currentPoll.id).update({
-                    responses: updatedResponses,
-                    lastModified: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                await db.collection('polls').doc(currentPoll.id).update(
+                    new firebase.firestore.FieldPath('responses', currentParticipant), myResponses,
+                    'lastModified', firebase.firestore.FieldValue.serverTimestamp()
+                );
 
                 if (newResponse !== 0) {
                     showTemporaryFeedback('Gespeichert! ✓');
@@ -1032,7 +1053,7 @@
 
                 const sheetsUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
                 document.getElementById('sheetsSection').classList.remove('hidden');
-                document.getElementById('sheetsUrl').innerHTML = `<a href="${sheetsUrl}" target="_blank">${sheetsUrl}</a>`;
+                document.getElementById('sheetsUrl').innerHTML = `<a href="${esc(sheetsUrl)}" target="_blank" rel="noopener">${esc(sheetsUrl)}</a>`;
             } catch (error) {
                 console.error('Fehler beim Export zu Google Sheets:', error);
                 alert('Fehler beim Export: ' + error.message);
