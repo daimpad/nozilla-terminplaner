@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terminplanung Tool</title>
+</head>
+<style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Zilla Slab', serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: #ffffcc;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        input[type="text"], input[type="datetime-local"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            background: #53f9ac;
+            color: #000;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Zilla Slab', serif;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(83, 249, 172, 0.3);
+        }
+
+        .btn:hover {
+            background: #45e699;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(83, 249, 172, 0.4);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: #53f9ac;
+            color: #000;
+        }
+
+        .btn-success:hover {
+            background: #45e699;
+        }
+
+        .btn-danger {
+            background: #000;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #333;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+        .options-list {
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .option-item:last-child {
+            border-bottom: none;
+        }
+
+        .poll-table {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #53f9ac;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .response-cell {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            vertical-align: middle;
+        }
+
+        .response-cell:hover {
+            background: #53f9ac;
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        .response-cell.clickable {
+            border: 2px dashed #53f9ac;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { border-color: #53f9ac; }
+            50% { border-color: #45e699; }
+            100% { border-color: #53f9ac; }
+        }
+
+        .response-cell.clickable:hover {
+            border-color: #45e699;
+            animation: none;
+        }
+
+        .response-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #ccc;
+            background: transparent;
+            transition: all 0.3s;
+        }
+
+        .response-indicator.filled {
+            background: #53f9ac;
+            border-color: #45e699;
+        }
+
+        .available .response-indicator {
+            background: #27ae60;
+            border-color: #229954;
+        }
+
+        .unavailable .response-indicator {
+            background: #e74c3c;
+            border-color: #c0392b;
+        }
+
+        .maybe .response-indicator {
+            background: #f39c12;
+            border-color: #e67e22;
+        }
+
+        .available {
+            background: #27ae60;
+            color: white;
+        }
+
+        .unavailable {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .maybe {
+            background: #f39c12;
+            color: white;
+        }
+
+        .instructions-banner {
+            background: linear-gradient(135deg, #53f9ac, #45e699);
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 500;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(83, 249, 172, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .instructions-banner .icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 5px;
+        }
+
+        .status-available {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-maybe {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-unavailable {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .legend {
+            background: rgba(83, 249, 172, 0.1);
+            border: 2px solid #53f9ac;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #000;
+        }
+
+        .summary-row {
+            font-weight: bold;
+            background: #ecf0f1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .share-section {
+            background: #53f9ac;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            position: sticky;
+            bottom: 20px;
+            box-shadow: 0 4px 15px rgba(83, 249, 172, 0.4);
+            border: 2px solid #45e699;
+        }
+
+        .share-section h3 {
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .share-section p {
+            color: #000;
+            font-weight: 500;
+        }
+
+        .share-url {
+            background: white;
+            padding: 12px;
+            border: 2px solid #000;
+            border-radius: 6px;
+            word-break: break-all;
+            font-family: monospace;
+            margin: 10px 0;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .firebase-status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .firebase-connected {
+            background: #d5f4e6;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .firebase-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .sheets-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .config-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .config-input {
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .poll-table {
+                font-size: 14px;
+            }
+        }
+</style>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Terminplanung Tool</h1>
+            <p>Finden Sie den besten Termin für alle Beteiligten</p>
+            <div id="firebaseStatus" class="firebase-status hidden"></div>
+        </div>
+
+        <div id="configSavedNotice" class="card hidden">
+            <h2>Konfiguration gespeichert</h2>
+            <p>Ihre Firebase- und Google Sheets-Einstellungen wurden gespeichert und müssen nicht erneut eingegeben werden.</p>
+            <button onclick="clearConfig()" class="btn btn-danger btn-small">Konfiguration löschen</button>
+        </div>
+
+        <div id="configSection" class="card config-section">
+            <h2>Firebase &amp; Google Sheets Konfiguration</h2>
+            <p>Geben Sie Ihre Firebase-Konfiguration und Google Sheets API-Schlüssel ein:</p>
+
+            <div class="form-group">
+                <label for="firebaseConfig">Firebase Config (JSON):</label>
+                <textarea id="firebaseConfig" rows="8" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..."}'></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="googleSheetsKey">Google Sheets API Key:</label>
+                <input type="text" id="googleSheetsKey" placeholder="AIzaSy..." />
+            </div>
+
+            <div class="form-group">
+                <label for="spreadsheetId">Google Spreadsheet ID (optional):</label>
+                <input type="text" id="spreadsheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms" />
+            </div>
+
+            <button onclick="initializeFirebase()" class="btn btn-success">Verbindung herstellen</button>
+            <button onclick="toggleConfig()" class="btn btn-small">Konfiguration ausblenden</button>
+            <button onclick="clearConfig()" class="btn btn-danger btn-small">Konfiguration löschen</button>
+        </div>
+
+        <div id="createSection" class="card">
+            <h2>Neue Terminumfrage erstellen</h2>
+            <div class="form-group">
+                <label for="pollTitle">Titel der Umfrage:</label>
+                <input type="text" id="pollTitle" placeholder="z.B. Team Meeting März" />
+            </div>
+
+            <div class="form-group">
+                <label>Terminoptionen:</label>
+                <div class="options-list">
+                    <div id="optionsList"></div>
+                    <div style="margin-top: 15px;">
+                        <input type="datetime-local" id="newOption" style="margin-bottom: 10px;" />
+                        <button onclick="addOption()" class="btn btn-small">Termin hinzufügen</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="createPoll()" class="btn btn-success" id="createPollBtn" disabled>Umfrage erstellen</button>
+        </div>
+
+        <div id="pollSection" class="card hidden">
+            <div id="pollHeader"></div>
+            <div id="pollResults" class="poll-table"></div>
+            <div id="participateForm">
+                <h3>An Umfrage teilnehmen</h3>
+                <div class="form-group">
+                    <label for="participantName">Ihr Name:</label>
+                    <input type="text" id="participantName" placeholder="Max Mustermann" />
+                </div>
+                <button onclick="addParticipant()" class="btn" id="participateBtn">Teilnehmen</button>
+
+                <div id="instructionsBanner" class="instructions-banner hidden">
+                    <div class="icon">👆</div>
+                    <strong>Klicken Sie auf die Termine in der Tabelle</strong> um Ihre Verfügbarkeit anzugeben!
+                    <br />
+                    <small>Ihre Auswahl wird automatisch gespeichert</small>
+                </div>
+
+                <div id="legend" class="legend hidden">
+                    <div class="legend-title">Bedeutung der Symbole:</div>
+                    <span class="status-indicator status-available">✓ Verfügbar</span>
+                    <span class="status-indicator status-maybe">? Vielleicht</span>
+                    <span class="status-indicator status-unavailable">✗ Nicht verfügbar</span>
+                </div>
+            </div>
+
+            <div id="shareSection" class="share-section hidden">
+                <h3>📤 Umfrage teilen</h3>
+                <p>Teilen Sie diesen Link mit allen Teilnehmern:</p>
+                <div class="share-url" id="shareUrl"></div>
+                <button onclick="copyLink()" class="btn btn-small">Link kopieren</button>
+                <button onclick="exportToSheets()" class="btn btn-small" id="exportBtn">Export zu Google Sheets</button>
+            </div>
+
+            <div id="sheetsSection" class="sheets-section hidden">
+                <h3>Google Sheets Export</h3>
+                <p>Die Umfrageergebnisse wurden erfolgreich exportiert:</p>
+                <div id="sheetsUrl"></div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading hidden">Lädt...</div>
+    </div>
+
+    <script src="firebase-app-compat.min.js"></script>
+    <script src="firebase-firestore-compat.min.js"></script>
+
+    <script>
+        let db = null;
+        let currentPoll = null;
+        let currentParticipant = null;
+        let pollData = {
+            options: [],
+            participants: [],
+            responses: {}
+        };
+        let firebaseConfig = null;
+        let googleSheetsApiKey = null;
+        let spreadsheetId = null;
+        let unsubscribe = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedConfig();
+            setDefaultDateTime();
+            checkUrlForPoll();
+        });
+
+        function loadSavedConfig() {
+            const savedConfig = localStorage.getItem('firebase_config');
+            const savedSheetsKey = localStorage.getItem('sheets_api_key');
+            const savedSpreadsheetId = localStorage.getItem('spreadsheet_id');
+
+            if (savedConfig && savedSheetsKey) {
+                firebaseConfig = JSON.parse(savedConfig);
+                googleSheetsApiKey = savedSheetsKey;
+                spreadsheetId = savedSpreadsheetId || null;
+
+                handleConfigStoredState(true);
+                initializeFirebase(true);
+            }
+        }
+
+        function handleConfigStoredState(isStored) {
+            const configSection = document.getElementById('configSection');
+            const savedNotice = document.getElementById('configSavedNotice');
+
+            if (isStored) {
+                configSection.classList.add('hidden');
+                savedNotice.classList.remove('hidden');
+            } else {
+                configSection.classList.remove('hidden');
+                savedNotice.classList.add('hidden');
+            }
+        }
+
+        function toggleConfig() {
+            const configSection = document.getElementById('configSection');
+            configSection.classList.toggle('hidden');
+        }
+
+        function clearConfig() {
+            if (confirm('Möchten Sie wirklich alle gespeicherten Konfigurationsdaten löschen?')) {
+                localStorage.removeItem('firebase_config');
+                localStorage.removeItem('sheets_api_key');
+                localStorage.removeItem('spreadsheet_id');
+
+                firebaseConfig = null;
+                googleSheetsApiKey = null;
+                spreadsheetId = null;
+
+                document.getElementById('firebaseConfig').value = '';
+                document.getElementById('googleSheetsKey').value = '';
+                document.getElementById('spreadsheetId').value = '';
+
+                handleConfigStoredState(false);
+                document.getElementById('createPollBtn').disabled = true;
+
+                showFirebaseStatus('Konfiguration gelöscht. Bitte erneut eingeben.', 'error');
+            }
+        }
+
+        async function initializeFirebase(useSaved = false) {
+            try {
+                showLoading(true);
+
+                let configText = null;
+                let sheetsKey = null;
+                let storedSpreadsheet = null;
+
+                if (useSaved) {
+                    configText = localStorage.getItem('firebase_config');
+                    sheetsKey = localStorage.getItem('sheets_api_key');
+                    storedSpreadsheet = localStorage.getItem('spreadsheet_id');
+                } else {
+                    configText = document.getElementById('firebaseConfig').value;
+                    sheetsKey = document.getElementById('googleSheetsKey').value;
+                    storedSpreadsheet = document.getElementById('spreadsheetId').value || null;
+                }
+
+                if (!configText || !sheetsKey) {
+                    throw new Error('Firebase-Konfiguration und Google Sheets API Key sind erforderlich');
+                }
+
+                firebaseConfig = JSON.parse(configText);
+                googleSheetsApiKey = sheetsKey;
+                spreadsheetId = storedSpreadsheet || null;
+
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+
+                db = firebase.firestore();
+
+                await db.collection('polls').limit(1).get();
+
+                if (!useSaved) {
+                    localStorage.setItem('firebase_config', configText);
+                    localStorage.setItem('sheets_api_key', googleSheetsApiKey);
+                    if (spreadsheetId) {
+                        localStorage.setItem('spreadsheet_id', spreadsheetId);
+                    } else {
+                        localStorage.removeItem('spreadsheet_id');
+                    }
+                }
+
+                showFirebaseStatus('Erfolgreich mit Firebase verbunden!', 'success');
+                document.getElementById('createPollBtn').disabled = false;
+
+                handleConfigStoredState(true);
+
+                checkUrlForPoll();
+            } catch (error) {
+                console.error('Firebase-Initialisierung fehlgeschlagen:', error);
+                showFirebaseStatus('Fehler bei der Verbindung: ' + error.message, 'error');
+                if (useSaved) {
+                    handleConfigStoredState(false);
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showFirebaseStatus(message, type) {
+            const statusDiv = document.getElementById('firebaseStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `firebase-status firebase-${type === 'success' ? 'connected' : 'error'}`;
+            statusDiv.classList.remove('hidden');
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        function setDefaultDateTime() {
+            const now = new Date();
+            const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            const isoString = tomorrow.toISOString().slice(0, 16);
+            const newOptionInput = document.getElementById('newOption');
+            if (newOptionInput) {
+                newOptionInput.value = isoString;
+            }
+        }
+
+        function checkUrlForPoll() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pollId = urlParams.get('poll');
+            if (pollId && db) {
+                loadPoll(pollId);
+            }
+        }
+
+        function addOption() {
+            const optionInput = document.getElementById('newOption');
+            const optionValue = optionInput.value;
+
+            if (!optionValue) {
+                alert('Bitte wählen Sie einen Termin aus.');
+                return;
+            }
+
+            const optionDate = new Date(optionValue);
+            const formattedOption = optionDate
+                .toLocaleString('de-DE', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+                .replace(' um ', ' ');
+
+            pollData.options.push({
+                datetime: optionValue,
+                formatted: formattedOption
+            });
+
+            renderOptions();
+            optionInput.value = '';
+            setDefaultDateTime();
+        }
+
+        function renderOptions() {
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = '';
+
+            pollData.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option-item';
+                optionDiv.innerHTML = `
+                    <span>${option.formatted}</span>
+                    <button onclick="removeOption(${index})" class="btn btn-danger btn-small">Entfernen</button>
+                `;
+                optionsList.appendChild(optionDiv);
+            });
+        }
+
+        function removeOption(index) {
+            pollData.options.splice(index, 1);
+            renderOptions();
+        }
+
+        async function createPoll() {
+            const title = document.getElementById('pollTitle').value;
+
+            if (!title || pollData.options.length === 0) {
+                alert('Bitte geben Sie einen Titel ein und fügen Sie mindestens einen Termin hinzu.');
+                return;
+            }
+
+            if (!db) {
+                alert('Firebase-Verbindung nicht verfügbar. Bitte konfigurieren Sie Firebase zuerst.');
+                return;
+            }
+
+            try {
+                showLoading(true);
+
+                const pollDoc = {
+                    title: title,
+                    options: pollData.options,
+                    participants: [],
+                    responses: {},
+                    created: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastModified: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                const docRef = await db.collection('polls').add(pollDoc);
+                currentPoll = { id: docRef.id, ...pollDoc };
+
+                showPoll(currentPoll);
+                showShareSection();
+
+                document.getElementById('pollTitle').value = '';
+                pollData = { options: [], participants: [], responses: {} };
+                renderOptions();
+            } catch (error) {
+                console.error('Fehler beim Erstellen der Umfrage:', error);
+                alert('Fehler beim Erstellen der Umfrage: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadPoll(pollId) {
+            if (!db) {
+                showFirebaseStatus('Firebase nicht konfiguriert. Bitte konfigurieren Sie Firebase zuerst.', 'error');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const doc = await db.collection('polls').doc(pollId).get();
+                if (doc.exists) {
+                    currentPoll = { id: doc.id, ...doc.data() };
+                    showPoll(currentPoll);
+                    setupRealtimeListener(pollId);
+                } else {
+                    alert('Umfrage nicht gefunden.');
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Umfrage:', error);
+                alert('Fehler beim Laden der Umfrage: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function setupRealtimeListener(pollId) {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+
+            unsubscribe = db.collection('polls').doc(pollId).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const updatedPoll = { id: doc.id, ...doc.data() };
+                    currentPoll = updatedPoll;
+                    renderPollTable();
+                }
+            });
+        }
+
+        function showPoll(poll) {
+            document.getElementById('createSection').classList.add('hidden');
+            document.getElementById('pollSection').classList.remove('hidden');
+
+            const createdDate = poll.created ? (poll.created.toDate ? poll.created.toDate() : new Date(poll.created)) : new Date();
+
+            document.getElementById('pollHeader').innerHTML = `
+                <h2>${poll.title}</h2>
+                <p>Erstellt am: ${createdDate.toLocaleString('de-DE')}</p>
+            `;
+
+            renderPollTable();
+        }
+
+        async function addParticipant() {
+            const nameInput = document.getElementById('participantName');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('Bitte geben Sie Ihren Namen ein.');
+                return;
+            }
+
+            if (currentPoll.participants && currentPoll.participants.includes(name)) {
+                alert('Dieser Name ist bereits vorhanden.');
+                return;
+            }
+
+            try {
+                showLoading(true);
+
+                const updatedParticipants = [...(currentPoll.participants || []), name];
+                const updatedResponses = { ...(currentPoll.responses || {}) };
+                updatedResponses[name] = new Array(currentPoll.options.length).fill(0);
+
+                await db.collection('polls').doc(currentPoll.id).update({
+                    participants: updatedParticipants,
+                    responses: updatedResponses,
+                    lastModified: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                currentParticipant = name;
+                nameInput.value = '';
+
+                document.getElementById('instructionsBanner').classList.remove('hidden');
+                document.getElementById('legend').classList.remove('hidden');
+                document.getElementById('participateForm').style.display = 'none';
+            } catch (error) {
+                console.error('Fehler beim Hinzufügen des Teilnehmers:', error);
+                alert('Fehler beim Hinzufügen des Teilnehmers: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderPollTable() {
+            const resultsDiv = document.getElementById('pollResults');
+
+            if (!currentPoll.participants || currentPoll.participants.length === 0) {
+                resultsDiv.innerHTML = '<p>Noch keine Teilnehmer. Bitte geben Sie unten Ihren Namen ein.</p>';
+                return;
+            }
+
+            let table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Teilnehmer</th>
+                            ${currentPoll.options.map(option => `<th>${option.formatted}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            currentPoll.participants.forEach(participant => {
+                table += `<tr><td><strong>${participant}</strong></td>`;
+                const responses = currentPoll.responses[participant] || [];
+                responses.forEach((response, optionIndex) => {
+                    const cellClass = response === 1 ? 'available' : response === -1 ? 'unavailable' : response === 0.5 ? 'maybe' : '';
+                    const isClickable = participant === currentParticipant;
+                    const clickHandler = isClickable ? `onclick="toggleResponse(${optionIndex})"` : '';
+                    const clickableClass = isClickable && response === 0 ? 'clickable' : '';
+
+                    let indicatorContent = '';
+                    if (response === 1) {
+                        indicatorContent = '<div class="response-indicator filled">✓</div>';
+                    } else if (response === -1) {
+                        indicatorContent = '<div class="response-indicator filled">✗</div>';
+                    } else if (response === 0.5) {
+                        indicatorContent = '<div class="response-indicator filled">?</div>';
+                    } else {
+                        indicatorContent = '<div class="response-indicator">−</div>';
+                    }
+
+                    table += `<td class="response-cell ${cellClass} ${clickableClass}" ${clickHandler} title="${isClickable ? 'Klicken zum Ändern' : ''}">${indicatorContent}</td>`;
+                });
+                table += '</tr>';
+            });
+
+            table += '<tr class="summary-row"><td><strong>✓ Verfügbar</strong></td>';
+            currentPoll.options.forEach((option, index) => {
+                const availableCount = currentPoll.participants.filter(p => currentPoll.responses[p] && currentPoll.responses[p][index] === 1).length;
+                table += `<td><strong>${availableCount}</strong></td>`;
+            });
+            table += '</tr></tbody></table>';
+
+            resultsDiv.innerHTML = table;
+        }
+
+        async function toggleResponse(optionIndex) {
+            if (!currentParticipant) return;
+
+            try {
+                const currentResponse = currentPoll.responses[currentParticipant][optionIndex];
+                let newResponse;
+
+                if (currentResponse === 0) {
+                    newResponse = 1;
+                } else if (currentResponse === 1) {
+                    newResponse = 0.5;
+                } else if (currentResponse === 0.5) {
+                    newResponse = -1;
+                } else {
+                    newResponse = 0;
+                }
+
+                const updatedResponses = { ...currentPoll.responses };
+                updatedResponses[currentParticipant][optionIndex] = newResponse;
+
+                await db.collection('polls').doc(currentPoll.id).update({
+                    responses: updatedResponses,
+                    lastModified: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                if (newResponse !== 0) {
+                    showTemporaryFeedback('Gespeichert! ✓');
+                }
+            } catch (error) {
+                console.error('Fehler beim Aktualisieren der Antwort:', error);
+                alert('Fehler beim Speichern der Antwort: ' + error.message);
+            }
+        }
+
+        function showTemporaryFeedback(message) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #53f9ac;
+                color: #000;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideInOut 2s ease-in-out;
+            `;
+            feedback.textContent = message;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInOut {
+                    0% { transform: translateX(100%); opacity: 0; }
+                    20%, 80% { transform: translateX(0); opacity: 1; }
+                    100% { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(feedback);
+
+            setTimeout(() => {
+                document.body.removeChild(feedback);
+                document.head.removeChild(style);
+            }, 2000);
+        }
+
+        function showShareSection() {
+            document.getElementById('shareSection').classList.remove('hidden');
+            const shareUrl = `${window.location.origin}${window.location.pathname}?poll=${currentPoll.id}`;
+            document.getElementById('shareUrl').textContent = shareUrl;
+
+            window.history.pushState({}, '', `?poll=${currentPoll.id}`);
+        }
+
+        function copyLink() {
+            const shareUrl = document.getElementById('shareUrl').textContent;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('Link wurde in die Zwischenablage kopiert!');
+            });
+        }
+
+        async function exportToSheets() {
+            if (!googleSheetsApiKey) {
+                alert('Google Sheets API Key nicht konfiguriert.');
+                return;
+            }
+
+            try {
+                showLoading(true);
+
+                let sheetId = spreadsheetId;
+                if (!sheetId) {
+                    sheetId = await createSpreadsheet();
+                    spreadsheetId = sheetId;
+                    localStorage.setItem('spreadsheet_id', sheetId);
+                }
+
+                const exportData = prepareExportData();
+
+                await writeToSheets(sheetId, exportData);
+
+                const sheetsUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
+                document.getElementById('sheetsSection').classList.remove('hidden');
+                document.getElementById('sheetsUrl').innerHTML = `<a href="${sheetsUrl}" target="_blank">${sheetsUrl}</a>`;
+            } catch (error) {
+                console.error('Fehler beim Export zu Google Sheets:', error);
+                alert('Fehler beim Export: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function createSpreadsheet() {
+            const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets?key=${googleSheetsApiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    properties: {
+                        title: `Terminumfrage: ${currentPoll.title}`
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Fehler beim Erstellen der Spreadsheet');
+            }
+
+            const data = await response.json();
+            return data.spreadsheetId;
+        }
+
+        function prepareExportData() {
+            const data = [];
+
+            const headers = ['Teilnehmer', ...currentPoll.options.map(opt => opt.formatted)];
+            data.push(headers);
+
+            currentPoll.participants.forEach(participant => {
+                const row = [participant];
+                const responses = currentPoll.responses[participant] || [];
+                responses.forEach(response => {
+                    if (response === 1) row.push('Verfügbar');
+                    else if (response === 0.5) row.push('Vielleicht');
+                    else if (response === -1) row.push('Nicht verfügbar');
+                    else row.push('Keine Antwort');
+                });
+                data.push(row);
+            });
+
+            const summaryRow = ['Anzahl Verfügbar'];
+            currentPoll.options.forEach((option, index) => {
+                const availableCount = currentPoll.participants.filter(p => currentPoll.responses[p] && currentPoll.responses[p][index] === 1).length;
+                summaryRow.push(availableCount);
+            });
+            data.push(summaryRow);
+
+            return data;
+        }
+
+        async function writeToSheets(sheetId, data) {
+            const range = `Sheet1!A1:${String.fromCharCode(65 + data[0].length - 1)}${data.length}`;
+
+            const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW&key=${googleSheetsApiKey}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    values: data
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Fehler beim Schreiben in Google Sheets');
+            }
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (show) {
+                loading.classList.remove('hidden');
+            } else {
+                loading.classList.add('hidden');
+            }
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        });
+    </script>
+</body>
+</html>
