@@ -38,6 +38,15 @@ service cloud.firestore {
 }
 ```
 
+## Kalender
+
+Sobald jemand abgestimmt hat, zeigt die Seite unter der Tabelle den **besten Termin** (bei Gleichstand alle) mit zwei Knöpfen:
+
+- **In Google Kalender** öffnet einen vorausgefüllten Termin in Google Kalender.
+- **Kalenderdatei (.ics)** lädt eine Datei für Outlook, Apple Kalender und alle anderen.
+
+Die Dauer wird beim Anlegen der Umfrage gewählt (Standard: 1 Stunde). Termine werden in der Zeitzone des Browsers eingegeben und für den Kalender in UTC umgerechnet, damit sie in jedem Kalender zur richtigen Uhrzeit landen.
+
 ## Google-Sheets-Export
 
 Der Export ist optional. **Er funktioniert mit einem reinen API-Schlüssel nicht:** Google erlaubt das Anlegen und Beschreiben von Tabellen nur mit OAuth-Anmeldung. Für einen funktionierenden Export braucht es entweder eine Google-Anmeldung in der Seite oder einen CSV-Download als einfachere Alternative.
