@@ -158,3 +158,24 @@
   .add-option { flex-direction: column; }
   .share__actions, .share__actions .nz-btn { width: 100%; }
 }
+
+/* ── Titel und Dauer nebeneinander ─────────────────────────────────────── */
+.row-title { display: grid; grid-template-columns: 1fr 200px; gap: var(--nz-space-4); }
+
+/* ── Bester Termin → Kalender ──────────────────────────────────────────── */
+.best { display: grid; gap: var(--nz-space-4); margin-bottom: var(--nz-space-6); }
+.best__item {
+  display: flex; align-items: center; gap: var(--nz-space-4); flex-wrap: wrap;
+  padding: var(--nz-space-5); background: var(--nz-surface);
+  border: var(--nz-stroke-strong) solid var(--nz-line); border-left: 12px solid var(--nz-signal);
+  box-shadow: var(--nz-shadow-md);
+}
+.best__text { flex: 1; min-width: 220px; }
+.best__date { font-family: var(--nz-font-display); font-weight: 700; font-size: 26px; line-height: 1.15; margin: 6px 0 4px; }
+.best__meta { font-size: var(--nz-text-sm); color: var(--nz-text-muted); }
+.best__actions { display: flex; gap: var(--nz-space-3); flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .row-title { grid-template-columns: 1fr; gap: 0; }
+  .best__actions, .best__actions .nz-btn { width: 100%; }
+}

@@ -72,10 +72,23 @@
             <div class="nz-label">Schritt 1</div>
             <h2>Neue Umfrage.</h2>
 
-            <label class="nz-field">
-                <span class="nz-field__label">Titel</span>
-                <input type="text" id="pollTitle" class="nz-input" placeholder="z. B. Team-Meeting März" />
-            </label>
+            <div class="row-title">
+                <label class="nz-field">
+                    <span class="nz-field__label">Titel</span>
+                    <input type="text" id="pollTitle" class="nz-input" placeholder="z. B. Team-Meeting März" />
+                </label>
+                <label class="nz-field">
+                    <span class="nz-field__label">Dauer</span>
+                    <select id="pollDuration" class="nz-select">
+                        <option value="30">30 Minuten</option>
+                        <option value="60" selected>1 Stunde</option>
+                        <option value="90">1,5 Stunden</option>
+                        <option value="120">2 Stunden</option>
+                        <option value="180">3 Stunden</option>
+                        <option value="480">Ganzer Tag (8 h)</option>
+                    </select>
+                </label>
+            </div>
 
             <div class="nz-field">
                 <span class="nz-field__label">Termine</span>
@@ -107,6 +120,8 @@
             </div>
 
             <div id="pollResults" class="poll-table"></div>
+
+            <div id="bestSection" class="best hidden" aria-live="polite"></div>
 
             <div id="legend" class="legend hidden" aria-label="Legende">
                 <span><span class="mark is-yes" aria-hidden="true">✓</span> Verfügbar</span>
@@ -415,6 +430,7 @@
 
                 const pollDoc = {
                     title: title,
+                    duration: parseInt(document.getElementById('pollDuration').value, 10) || 60,
                     options: pollData.options,
                     participants: [],
                     responses: {},
@@ -586,6 +602,110 @@
             table += '</tbody></table>';
 
             resultsDiv.innerHTML = table;
+            renderBest(counts, best);
+        }
+
+        // ── Kalender ────────────────────────────────────────────────────────
+        // Der beste Termin lässt sich direkt übernehmen: als Link in Google
+        // Kalender oder als .ics-Datei für Outlook, Apple und alle anderen.
+
+        function renderBest(counts, best) {
+            const box = document.getElementById('bestSection');
+            const total = currentPoll.participants.length;
+            if (!best) { box.classList.add('hidden'); return; }
+
+            const winners = currentPoll.options
+                .map((option, i) => ({ option, i }))
+                .filter(w => counts[w.i] === best);
+
+            box.innerHTML = winners.map(w => `
+                <div class="best__item">
+                    <div class="best__text">
+                        <div class="nz-label">${winners.length > 1 ? 'Gleichauf · bester Termin' : 'Bester Termin'}</div>
+                        <div class="best__date">${esc(w.option.formatted)}</div>
+                        <div class="best__meta">${best} von ${total} können · ${esc(durationLabel())}</div>
+                    </div>
+                    <div class="best__actions">
+                        <a class="nz-btn nz-btn--primary" href="${esc(googleCalendarUrl(w.option))}" target="_blank" rel="noopener">In Google Kalender</a>
+                        <button type="button" class="nz-btn nz-btn--secondary" onclick="downloadIcs(${w.i})">Kalenderdatei (.ics)</button>
+                    </div>
+                </div>`).join('');
+            box.classList.remove('hidden');
+        }
+
+        function pollDuration() {
+            return parseInt(currentPoll.duration, 10) || 60;
+        }
+
+        // Dieselben Bezeichnungen wie im Auswahlfeld beim Anlegen
+        function durationLabel() {
+            const opt = document.querySelector(`#pollDuration option[value="${pollDuration()}"]`);
+            return opt ? opt.textContent : `${pollDuration()} Minuten`;
+        }
+
+        // Termine sind als lokale Zeit gespeichert ("2026-12-01T10:00"). Für den
+        // Kalender wird daraus ein eindeutiger Zeitpunkt in UTC.
+        function eventTimes(option) {
+            const start = new Date(option.datetime);
+            const end = new Date(start.getTime() + pollDuration() * 60000);
+            const utc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+            return { start: utc(start), end: utc(end) };
+        }
+
+        function pollUrl() {
+            return `${window.location.origin}${window.location.pathname}?poll=${currentPoll.id}`;
+        }
+
+        function googleCalendarUrl(option) {
+            const t = eventTimes(option);
+            const params = new URLSearchParams({
+                action: 'TEMPLATE',
+                text: currentPoll.title,
+                dates: `${t.start}/${t.end}`,
+                details: `Abgestimmt mit dem nozilla Terminplaner: ${pollUrl()}`
+            });
+            return `https://calendar.google.com/calendar/render?${params}`;
+        }
+
+        // Text für iCalendar maskieren und lange Zeilen falten (RFC 5545)
+        function icsText(value) {
+            return String(value).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+        }
+        function icsFold(line) {
+            const out = [];
+            while (line.length > 74) { out.push(line.slice(0, 74)); line = ' ' + line.slice(74); }
+            out.push(line);
+            return out.join('\r\n');
+        }
+
+        function downloadIcs(optionIndex) {
+            const option = currentPoll.options[optionIndex];
+            const t = eventTimes(option);
+            const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+            const lines = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//nozilla//Terminplaner//DE',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'BEGIN:VEVENT',
+                `UID:${currentPoll.id}-${optionIndex}@terminplaner.nozilla`,
+                `DTSTAMP:${stamp}`,
+                `DTSTART:${t.start}`,
+                `DTEND:${t.end}`,
+                `SUMMARY:${icsText(currentPoll.title)}`,
+                `DESCRIPTION:${icsText('Abgestimmt mit dem nozilla Terminplaner: ' + pollUrl())}`,
+                `URL:${pollUrl()}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].map(icsFold);
+            const blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = (currentPoll.title.replace(/[^\wäöüÄÖÜß -]+/g, '').trim() || 'termin') + '.ics';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
         }
 
         async function toggleResponse(optionIndex) {
